@@ -35,7 +35,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <auto-value.version>1.11.1</auto-value.version>
         <!-- Main class for exec-maven-plugin -->
         <exec.mainClass>com.example.helloworld.HelloWorldRun</exec.mainClass>
