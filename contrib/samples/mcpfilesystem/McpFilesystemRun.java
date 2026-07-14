@@ -1,4 +1,3 @@
-package com.example.mcpfilesystem;
 
 import com.google.adk.agents.RunConfig;
 import com.google.adk.artifacts.InMemoryArtifactService;
@@ -17,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/** Console runner that exercises {@link McpFilesystemAgent#ROOT_AGENT}. */
+/** Console runner that exercises {@link com.example.mcpfilesystem.McpFilesystemAgent#ROOT_AGENT}. */
 public final class McpFilesystemRun {
   private final String userId;
   private final String sessionId;
@@ -31,7 +30,7 @@ public final class McpFilesystemRun {
     InMemorySessionService sessionService = new InMemorySessionService();
     this.runner =
         new Runner(
-            McpFilesystemAgent.ROOT_AGENT,
+            com.example.mcpfilesystem.McpFilesystemAgent.ROOT_AGENT,
             appName,
             new InMemoryArtifactService(),
             sessionService,
@@ -83,7 +82,7 @@ public final class McpFilesystemRun {
                 + " the updated file.");
       }
     } finally {
-      McpFilesystemAgent.ROOT_AGENT
+      com.example.mcpfilesystem.McpFilesystemAgent.ROOT_AGENT
           .toolsets()
           .forEach(
               toolset -> {
