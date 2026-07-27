@@ -36,7 +36,9 @@
     <module>tutorials/city-time-weather</module>
     <module>tutorials/live-audio-single-agent</module>
     <module>a2a</module>
-    <module>adk-shrija</module>
+    <module>adk-shrija-v2</module>
+    <module>mcp-shrija-server</module>
+    <module>adk-shrija-domain</module>
   </modules>
 
   <properties>
