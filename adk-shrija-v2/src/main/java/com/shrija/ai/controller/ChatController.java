@@ -5,10 +5,7 @@ import com.shrija.ai.dto.ChatResponse;
 import com.shrija.ai.service.ConversationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Entry point for talking to Shrija AI. One endpoint, one job: hand the message to the Manager
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * layered-architecture / separation-of-concerns principles.
  */
 @RestController
+//@CrossOrigin("http://localhost:5173")
 @RequestMapping("/api/v1/chat")
 public class ChatController {
 

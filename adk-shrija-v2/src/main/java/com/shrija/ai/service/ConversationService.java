@@ -112,5 +112,7 @@ public class ConversationService {
    * @param sessionId session id to pass on the next call to continue this conversation
    * @param responseText the Manager Agent's aggregated response text
    */
-  public record ConversationResult(String sessionId, String responseText) {}
+  public record ConversationResult(String sessionId, String responseText) {
+
+  }
 }

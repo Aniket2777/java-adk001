@@ -7,15 +7,15 @@ server:
 
 shrija:
   ai:
-    gemini-api-key: ${GEMINI_API_KEY:}
-    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
-    jwt:
-      secret: ${JWT_SECRET:}
-      expiration-millis: ${JWT_EXPIRATION_MILLIS:3600000}
-    # mcp-shrija-server's Streamable HTTP endpoint. This module no longer
-    # has a datasource of its own - every DB-touching operation reaches
-    # the database exclusively through this MCP server. See McpToolsetConfig.
-    mcp-server-url: ${MCP_SERVER_URL:http://localhost:8082}
+    provider: bedrock
+
+    api-key: ${BEDROCK_API_KEY}
+
+    model: anthropic.claude-3-7-sonnet
+
+    aws-region: us-east-1
+
+    mcp-server-url: http://localhost:8082
 
 management:
   endpoints:
