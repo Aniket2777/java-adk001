@@ -39,6 +39,7 @@
     <module>adk-shrija-v2</module>
     <module>mcp-shrija-server</module>
     <module>adk-shrija-domain</module>
+      <module>Leaves-agent</module>
   </modules>
 
   <properties>

@@ -37,16 +37,16 @@ WHERE NOT EXISTS (
     SELECT 1 FROM employee_leave_balance WHERE employee_code = 'EMP2001' AND leave_type = 'ANNUAL');
 
 INSERT INTO employee_lifecycle_task (employee_code, task_type, task_name, status, due_date)
-SELECT 'EMP3050', 'ONBOARDING', 'Laptop provisioning', 'COMPLETED', CURRENT_DATE - 20
+SELECT 'EMP3050', 'ONBOARDING', 'Laptop provisioning', 'COMPLETED', DATE_SUB(CURRENT_DATE, INTERVAL 20 DAY)
 WHERE NOT EXISTS (
     SELECT 1 FROM employee_lifecycle_task WHERE employee_code = 'EMP3050' AND task_name = 'Laptop provisioning');
 
 INSERT INTO employee_lifecycle_task (employee_code, task_type, task_name, status, due_date)
-SELECT 'EMP3050', 'ONBOARDING', 'Access badge issued', 'COMPLETED', CURRENT_DATE - 18
+SELECT 'EMP3050', 'ONBOARDING', 'Access badge issued', 'COMPLETED', DATE_SUB(CURRENT_DATE, INTERVAL 18 DAY)
 WHERE NOT EXISTS (
     SELECT 1 FROM employee_lifecycle_task WHERE employee_code = 'EMP3050' AND task_name = 'Access badge issued');
 
 INSERT INTO employee_lifecycle_task (employee_code, task_type, task_name, status, due_date)
-SELECT 'EMP3050', 'ONBOARDING', 'Benefits enrollment', 'PENDING', CURRENT_DATE + 5
+SELECT 'EMP3050', 'ONBOARDING', 'Benefits enrollment', 'PENDING', DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)
 WHERE NOT EXISTS (
     SELECT 1 FROM employee_lifecycle_task WHERE employee_code = 'EMP3050' AND task_name = 'Benefits enrollment');
