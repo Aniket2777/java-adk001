@@ -12,12 +12,10 @@ import io.a2a.spec.AgentCard;
 import org.springframework.stereotype.Component;
 
 @Component
-public class A2AAgentClientSupport
-{
-    private static final String AGENT_CARD_PATH = "/card";
+public class A2AAgentClientSupport {
+  private static final String AGENT_CARD_PATH = "/card";
 
-  public BaseAgent connect(String baseUrl, String fallbackName, String fallbackDescription)
-  {
+  public BaseAgent connect(String baseUrl, String fallbackName, String fallbackDescription) {
     if (baseUrl == null || baseUrl.isBlank()) {
       throw new IllegalArgumentException("A2A target URL is not configured");
     }

@@ -16,13 +16,13 @@ ai:
 shrija:
   employee:
     ai:
-      gemini-api-key: AQ.Ab8RN6KWmCxqEb5iT1lds0tUngxendzYcP_K7XCN-GQ66C347Q
-      gemini-model: ${EMPLOYEE_GEMINI_MODEL:gemini-3.1-flash-lite}
-      mcp-server-url: ${EMPLOYEE_MCP_SERVER_URL:http://localhost:8082}  # was 8072
-      attendance-agent-url: ${ATTENDANCE_AGENT_A2A_URL:http://localhost:8084}
-      leave-agent-url: ${LEAVE_AGENT_A2A_URL:http://localhost:8083}
-      payroll-agent-url: ${PAYROLL_AGENT_A2A_URL:http://localhost:8085}
-      manager-agent-url: ${MANAGER_AGENT_A2A_URL:http://localhost:8086}
+#      gemini-api-key:  ${GEMINI_API_KEY}
+#      gemini-model: ${EMPLOYEE_GEMINI_MODEL:gemini-3.1-flash-lite}
+#      mcp-server-url: ${EMPLOYEE_MCP_SERVER_URL:http://localhost:8082}  # was 8072
+#      attendance-agent-url: ${ATTENDANCE_AGENT_A2A_URL:http://localhost:8084}
+#      leave-agent-url: ${LEAVE_AGENT_A2A_URL:http://localhost:8083}
+#      payroll-agent-url: ${PAYROLL_AGENT_A2A_URL:http://localhost:8085}
+#      manager-agent-url: ${MANAGER_AGENT_A2A_URL:http://localhost:8086}
 
 management:
   endpoints:
