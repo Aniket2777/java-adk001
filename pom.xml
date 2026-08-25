@@ -37,8 +37,11 @@
     <module>tutorials/live-audio-single-agent</module>
     <module>a2a</module>
     <module>adk-shrija-v2</module>
-    <module>mcp-shrija-server</module>
     <module>adk-shrija-domain</module>
+    <module>mcp-server</module>
+    <module>attendance-agent</module>
+    <module>auth-service</module>
+    <module>employee-agent</module>
   </modules>
 
   <properties>
