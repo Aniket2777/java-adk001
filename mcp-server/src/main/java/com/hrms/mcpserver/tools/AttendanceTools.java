@@ -40,22 +40,40 @@ public class AttendanceTools {
 
   @Tool(
       description =
-          "Record a check-out for an employee's existing attendance record and compute hours worked")
+          "Record a check-out for an employee for the given work date and compute hours worked")
   public Attendance checkOut(
-      @ToolParam(description = "Attendance record ID") Long attendanceId,
+      @ToolParam(description = "Employee ID") Long employeeId,
+      @ToolParam(description = "Work date (yyyy-MM-dd)") LocalDate workDate,
       @ToolParam(description = "Check-out time (HH:mm)") LocalTime checkOutTime) {
+
     Attendance attendance =
         attendanceRepository
-            .findById(attendanceId)
+            .findByEmployeeIdAndWorkDate(employeeId, workDate)
             .orElseThrow(
                 () ->
                     new IllegalArgumentException(
-                        "No attendance record found with id " + attendanceId));
+                        "No attendance record found for employee "
+                            + employeeId
+                            + " on "
+                            + workDate));
+
+    if (attendance.getCheckIn() == null) {
+      throw new IllegalStateException("Employee has no check-in record for " + workDate);
+    }
+
+    if (attendance.getCheckOut() != null) {
+      throw new IllegalStateException("Employee has already checked out for " + workDate);
+    }
+
     attendance.setCheckOut(checkOutTime);
+
     double hours = Duration.between(attendance.getCheckIn(), checkOutTime).toMinutes() / 60.0;
+
     attendance.setHoursWorked(Math.max(hours, 0));
+
     attendance.setStatus(
         hours < 4 ? Attendance.AttendanceStatus.HALF_DAY : Attendance.AttendanceStatus.PRESENT);
+
     return attendanceRepository.save(attendance);
   }
 
