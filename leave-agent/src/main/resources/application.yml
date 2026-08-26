@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: leave-agent
+
+server:
+  port: 8083
+
+# ADK (Agent Development Kit) settings for the LeaveAgent's LLM.
+adk:
+  model:
+    name: gemini-3.1-flash
+    temperature: 0.2
+
+# MCP server the Leave Agent connects to for external HR data
+# (e.g. holiday calendar, employee profile lookups).
+mcp:
+  hrms:
+    url: http://localhost:8081/mcp
+    request-timeout-seconds: 10
+
+# A2A peer agents this service collaborates with, and how this
+# agent identifies itself to them.
+agents:
+  self:
+    base-url: http://localhost:8083
+  manager:
+    url: http://localhost:8086
+  payroll:
+    url: http://localhost:8085
+  employee:
+    url: http://localhost:8082
+
+logging:
+  level:
+    root: INFO
+    com.ai.shrija.leave.agent: DEBUG

@@ -7,15 +7,12 @@ server:
 
 shrija:
   ai:
-    provider: bedrock
-
-    api-key: ${BEDROCK_API_KEY}
-
-    model: anthropic.claude-3-7-sonnet
-
-    aws-region: us-east-1
-
-    mcp-server-url: http://localhost:8082
+    gemini-api-key: ${GEMINI_API_KEY}
+    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
+    mcp-server-url: ${MCP_SERVER_URL:http://localhost:8082/mcp}
+    jwt:
+      secret: ${JWT_SECRET:change-this-development-secret-to-a-random-32-byte-value-123456789}
+      expiration-millis: ${JWT_EXPIRATION_MS:3600000}
 
 management:
   endpoints:
