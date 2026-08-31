@@ -25,24 +25,32 @@ public class AttendanceHistoryTool {
   }
 
   public Map<String, Object> getAttendanceHistory(
-      String requesterEmployeeId, String requesterRole, String employeeId, String from, String to) {
+          String requesterEmployeeId, String requesterRole, String employeeId, String from, String to) {
     authorizationService.requireSelfOrPrivileged(requesterEmployeeId, requesterRole, employeeId);
     verify(employeeId);
     String effectiveFrom =
-        from == null || from.isBlank() ? LocalDate.now().withDayOfMonth(1).toString() : from;
+            from == null || from.isBlank() ? LocalDate.now().withDayOfMonth(1).toString() : from;
     String effectiveTo = to == null || to.isBlank() ? LocalDate.now().toString() : to;
     return mcpClient.call(
-        "getAttendanceHistory",
-        Map.of("employeeId", employeeId, "from", effectiveFrom, "to", effectiveTo));
+            "getAttendanceForRange",
+            Map.of(
+                    "employeeId", Long.valueOf(employeeId),
+                    "start", effectiveFrom,
+                    "end", effectiveTo));
   }
 
   public Map<String, Object> getMonthlyAttendance(
-      String requesterEmployeeId, String requesterRole, String employeeId, String month) {
+          String requesterEmployeeId, String requesterRole, String employeeId, String month) {
     authorizationService.requireSelfOrPrivileged(requesterEmployeeId, requesterRole, employeeId);
     verify(employeeId);
-    String effectiveMonth = month == null || month.isBlank() ? YearMonth.now().toString() : month;
+    YearMonth effectiveMonth =
+            month == null || month.isBlank() ? YearMonth.now() : YearMonth.parse(month);
     return mcpClient.call(
-        "getMonthlyAttendance", Map.of("employeeId", employeeId, "month", effectiveMonth));
+            "getMonthlyAttendanceSummary",
+            Map.of(
+                    "employeeId", Long.valueOf(employeeId),
+                    "month", effectiveMonth.getMonthValue(),
+                    "year", effectiveMonth.getYear()));
   }
 
   private void verify(String employeeId) {
