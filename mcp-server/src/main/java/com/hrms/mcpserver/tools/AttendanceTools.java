@@ -137,4 +137,62 @@ public class AttendanceTools {
       double totalHoursWorked,
       long presentDays,
       long absentDays) {}
+
+  @Tool(
+          description =
+                  "Calculate an employee's working hours and overtime for a specific work date")
+  public WorkingHoursResult getWorkingHours(
+          @ToolParam(description = "Employee ID") Long employeeId,
+          @ToolParam(description = "Work date (yyyy-MM-dd)") LocalDate workDate) {
+
+    Attendance attendance =
+            attendanceRepository
+                    .findByEmployeeIdAndWorkDate(employeeId, workDate)
+                    .orElseThrow(
+                            () ->
+                                    new IllegalArgumentException(
+                                            "No attendance record found for employee "
+                                                    + employeeId
+                                                    + " on "
+                                                    + workDate));
+
+    LocalTime checkIn = attendance.getCheckIn();
+    LocalTime checkOut = attendance.getCheckOut();
+
+    if (checkIn == null || checkOut == null) {
+      return new WorkingHoursResult(
+              employeeId,
+              workDate,
+              checkIn,
+              checkOut,
+              0,
+              0);
+    }
+
+    long workingMinutes =
+            Duration.between(checkIn, checkOut).toMinutes();
+
+    long standardWorkingMinutes = 8 * 60;
+
+    long overtimeMinutes =
+            Math.max(
+                    workingMinutes - standardWorkingMinutes,
+                    0);
+
+    return new WorkingHoursResult(
+            employeeId,
+            workDate,
+            checkIn,
+            checkOut,
+            workingMinutes,
+            overtimeMinutes);
+  }
+
+  public record WorkingHoursResult(
+          Long employeeId,
+          LocalDate workDate,
+          LocalTime checkIn,
+          LocalTime checkOut,
+          long workingMinutes,
+          long overtimeMinutes) {}
 }
