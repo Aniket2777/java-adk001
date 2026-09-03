@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.genai.types.Content;
 import com.google.genai.types.Part;
 import com.shrija.attendance.agent.AttendanceAgent;
+import com.shrija.attendance.dto.AttendanceChatRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,24 +23,29 @@ public class AttendanceConversationService {
     this.runner = new InMemoryRunner(attendanceAgent.agent());
   }
 
-  public ConversationResult converse(String userId, String sessionId, String message) {
-    String effectiveUserId = userId == null || userId.isBlank() ? "anonymous" : userId;
+  public ConversationResult converse(AttendanceChatRequest request) {
+    String effectiveUserId =
+            request.userId() == null || request.userId().isBlank() ? "anonymous" : request.userId();
     String effectiveSessionId =
-        sessionId == null || sessionId.isBlank() ? UUID.randomUUID().toString() : sessionId;
+            request.sessionId() == null || request.sessionId().isBlank()
+                    ? UUID.randomUUID().toString()
+                    : request.sessionId();
 
     ensureSession(effectiveUserId, effectiveSessionId);
 
+    String contextualMessage = buildContextualMessage(request, effectiveUserId);
+
     Content userMessage =
-        Content.builder()
-            .role("user")
-            .parts(ImmutableList.of(Part.builder().text(message).build()))
-            .build();
+            Content.builder()
+                    .role("user")
+                    .parts(ImmutableList.of(Part.builder().text(contextualMessage).build()))
+                    .build();
 
     List<Event> events =
-        runner
-            .runAsync(effectiveUserId, effectiveSessionId, userMessage, RunConfig.builder().build())
-            .toList()
-            .blockingGet();
+            runner
+                    .runAsync(effectiveUserId, effectiveSessionId, userMessage, RunConfig.builder().build())
+                    .toList()
+                    .blockingGet();
 
     StringBuilder response = new StringBuilder();
     for (Event event : events) {
@@ -48,17 +54,44 @@ public class AttendanceConversationService {
     return new ConversationResult(effectiveSessionId, response.toString().stripTrailing());
   }
 
+  /**
+   * Grounds the requester's identity, role, and (optionally) the target employee id
+   * in trusted request context rather than leaving the LLM to infer or fabricate
+   * them from free text. Mirrors the pattern already used by EmployeeConversationService.
+   */
+  private String buildContextualMessage(AttendanceChatRequest request, String requesterEmployeeId) {
+    StringBuilder context = new StringBuilder();
+    context
+            .append("Authenticated actor: ")
+            .append(requesterEmployeeId)
+            .append("; role: ")
+            .append(request.role())
+            .append("; requesterEmployeeId: ")
+            .append(requesterEmployeeId);
+
+    // Always emit a literal id here — never a word like "self" — so the model has
+    // nothing to paraphrase and can only copy the value verbatim into tool calls.
+    String targetEmployeeId =
+            request.employeeId() != null && !request.employeeId().isBlank()
+                    ? request.employeeId()
+                    : requesterEmployeeId;
+    context.append("; targetEmployeeId: ").append(targetEmployeeId);
+
+    context.append(".\nUser request: ").append(request.message());
+    return context.toString();
+  }
+
   private void ensureSession(String userId, String sessionId) {
     Session existing =
-        runner
-            .sessionService()
-            .getSession(runner.appName(), userId, sessionId, Optional.empty())
-            .blockingGet();
+            runner
+                    .sessionService()
+                    .getSession(runner.appName(), userId, sessionId, Optional.empty())
+                    .blockingGet();
     if (existing == null) {
       runner
-          .sessionService()
-          .createSession(runner.appName(), userId, null, sessionId)
-          .blockingGet();
+              .sessionService()
+              .createSession(runner.appName(), userId, null, sessionId)
+              .blockingGet();
     }
   }
 

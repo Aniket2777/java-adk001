@@ -33,7 +33,13 @@ public class AttendanceReportTool {
   }
 
   public Map<String, Object> getAttendanceSummary(
-          String requesterEmployeeId, String requesterRole, String employeeId, String month) {
+          String requesterEmployeeId,
+          String requesterRole,
+          String employeeId,
+          String month) {
+
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+    requireNumericId("employeeId", employeeId);
 
     authorizationService.requireSelfOrPrivileged(
             requesterEmployeeId,
@@ -47,11 +53,20 @@ public class AttendanceReportTool {
                     ? YearMonth.now().toString()
                     : month;
 
+    YearMonth yearMonth;
+    try {
+      yearMonth = YearMonth.parse(effectiveMonth);
+    } catch (Exception ex) {
+      throw new IllegalArgumentException(
+              "month must be in yyyy-MM format, got: '" + effectiveMonth + "'");
+    }
+
     return mcpClient.call(
-            "getAttendanceSummary",
+            "getMonthlyAttendanceSummary",
             Map.of(
-                    "employeeId", employeeId,
-                    "month", effectiveMonth));
+                    "employeeId", Long.valueOf(employeeId),
+                    "month", yearMonth.getMonthValue(),
+                    "year", yearMonth.getYear()));
   }
 
   public Map<String, Object> getWorkingHours(
@@ -59,6 +74,9 @@ public class AttendanceReportTool {
           String requesterRole,
           String employeeId,
           String date) {
+
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+    requireNumericId("employeeId", employeeId);
 
     authorizationService.requireSelfOrPrivileged(
             requesterEmployeeId,
@@ -85,6 +103,9 @@ public class AttendanceReportTool {
           String employeeId,
           String month) {
 
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+    requireNumericId("employeeId", employeeId);
+
     authorizationService.requireSelfOrPrivileged(
             requesterEmployeeId,
             requesterRole,
@@ -109,6 +130,8 @@ public class AttendanceReportTool {
           String requesterRole,
           String date) {
 
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+
     authorizationService.requirePrivileged(
             requesterEmployeeId,
             requesterRole);
@@ -128,6 +151,9 @@ public class AttendanceReportTool {
           String requesterRole,
           String employeeId,
           String month) {
+
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+    requireNumericId("employeeId", employeeId);
 
     authorizationService.requireSelfOrPrivileged(
             requesterEmployeeId,
@@ -159,6 +185,8 @@ public class AttendanceReportTool {
           String requesterRole,
           String date) {
 
+    requireNumericId("requesterEmployeeId", requesterEmployeeId);
+
     authorizationService.requirePrivileged(
             requesterEmployeeId,
             requesterRole);
@@ -187,6 +215,24 @@ public class AttendanceReportTool {
 
       throw new IllegalStateException(
               "Employee could not be verified by Employee Agent.");
+    }
+  }
+
+  /**
+   * Fails fast, locally, with a clear message when an id argument isn't a real numeric
+   * employee id (e.g. a placeholder like "me" or "self" a model might substitute) —
+   * instead of letting it travel all the way to Employee Agent via A2A and come back
+   * as an opaque NOT_FOUND / internal error.
+   */
+  private void requireNumericId(String fieldName, String value) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalArgumentException(fieldName + " is required.");
+    }
+    try {
+      Long.parseLong(value.trim());
+    } catch (NumberFormatException ex) {
+      throw new IllegalArgumentException(
+              fieldName + " must be a numeric employee id, got: '" + value + "'");
     }
   }
 

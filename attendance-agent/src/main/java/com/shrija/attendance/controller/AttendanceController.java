@@ -19,9 +19,8 @@ public class AttendanceController {
 
   @PostMapping("/chat")
   public ResponseEntity<AttendanceChatResponse> chat(
-      @Valid @RequestBody AttendanceChatRequest request) {
-    var result =
-        conversationService.converse(request.userId(), request.sessionId(), request.message());
+          @Valid @RequestBody AttendanceChatRequest request) {
+    var result = conversationService.converse(request);
     return ResponseEntity.ok(new AttendanceChatResponse(result.sessionId(), result.responseText()));
   }
 }
