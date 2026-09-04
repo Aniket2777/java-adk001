@@ -27,7 +27,11 @@ public class TodayAttendanceTool {
           String requesterEmployeeId, String requesterRole, String employeeId, String date) {
     authorizationService.requireSelfOrPrivileged(requesterEmployeeId, requesterRole, employeeId);
     verify(employeeId);
-    String effectiveDate = date == null || date.isBlank() ? LocalDate.now().toString() : date;
+
+    // Always resolve to the real current date server-side.
+    // Ignore any date the model may have hallucinated/guessed in its function-call args.
+    String effectiveDate = LocalDate.now().toString();
+
     return mcpClient.call(
             "getAttendanceForRange",
             Map.of(
