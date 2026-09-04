@@ -227,4 +227,29 @@ public class AttendanceTools {
           int year,
           long totalOvertimeMinutes,
           double totalOvertimeHours) {}
+
+  @Tool(description = "Get attendance status for all employees on a given date (used by managers)")
+  public List<TeamAttendanceEntry> getTeamAttendance(
+          @ToolParam(description = "Date (yyyy-MM-dd)") LocalDate date) {
+
+    List<Attendance> records = attendanceRepository.findByWorkDate(date);
+
+    return records.stream()
+            .map(a -> new TeamAttendanceEntry(
+                    a.getEmployeeId(),
+                    a.getWorkDate(),
+                    a.getStatus(),
+                    a.getCheckIn(),
+                    a.getCheckOut(),
+                    a.getHoursWorked()))
+            .toList();
+  }
+
+  public record TeamAttendanceEntry(
+          Long employeeId,
+          LocalDate workDate,
+          Attendance.AttendanceStatus status,
+          LocalTime checkIn,
+          LocalTime checkOut,
+          double hoursWorked) {}
 }

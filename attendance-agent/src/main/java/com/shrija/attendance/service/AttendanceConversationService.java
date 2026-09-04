@@ -69,13 +69,20 @@ public class AttendanceConversationService {
             .append("; requesterEmployeeId: ")
             .append(requesterEmployeeId);
 
-    // Always emit a literal id here — never a word like "self" — so the model has
-    // nothing to paraphrase and can only copy the value verbatim into tool calls.
     String targetEmployeeId =
             request.employeeId() != null && !request.employeeId().isBlank()
                     ? request.employeeId()
                     : requesterEmployeeId;
     context.append("; targetEmployeeId: ").append(targetEmployeeId);
+
+    // Ground "today" the same way targetEmployeeId is grounded above — always emit
+    // a literal date so the model has nothing to guess or fabricate.
+    String effectiveDate =
+            request.date() != null && !request.date().isBlank()
+                    ? request.date()
+                    : java.time.LocalDate.now().toString();
+    context.append("; currentDate: ").append(effectiveDate);
+    context.append("; requestedDate: ").append(request.date() == null ? "not specified" : request.date());
 
     context.append(".\nUser request: ").append(request.message());
     return context.toString();
