@@ -106,23 +106,24 @@ public class AttendanceReportTool {
     requireNumericId("requesterEmployeeId", requesterEmployeeId);
     requireNumericId("employeeId", employeeId);
 
-    authorizationService.requireSelfOrPrivileged(
-            requesterEmployeeId,
-            requesterRole,
-            employeeId);
-
+    authorizationService.requireSelfOrPrivileged(requesterEmployeeId, requesterRole, employeeId);
     verify(employeeId);
 
-    String effectiveMonth =
-            month == null || month.isBlank()
-                    ? YearMonth.now().toString()
-                    : month;
+    String effectiveMonth = month == null || month.isBlank() ? YearMonth.now().toString() : month;
+
+    YearMonth yearMonth;
+    try {
+      yearMonth = YearMonth.parse(effectiveMonth);
+    } catch (Exception ex) {
+      throw new IllegalArgumentException("month must be in yyyy-MM format, got: '" + effectiveMonth + "'");
+    }
 
     return mcpClient.call(
             "getOvertime",
             Map.of(
-                    "employeeId", employeeId,
-                    "month", effectiveMonth));
+                    "employeeId", Long.valueOf(employeeId),
+                    "month", yearMonth.getMonthValue(),
+                    "year", yearMonth.getYear()));
   }
 
   public Map<String, Object> getTeamAttendance(

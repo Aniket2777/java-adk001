@@ -195,4 +195,36 @@ public class AttendanceTools {
           LocalTime checkOut,
           long workingMinutes,
           long overtimeMinutes) {}
+
+  @Tool(description = "Get total overtime minutes/hours for an employee for a given month")
+  public OvertimeSummary getOvertime(
+          @ToolParam(description = "Employee ID") Long employeeId,
+          @ToolParam(description = "Month (1-12)") int month,
+          @ToolParam(description = "Year") int year) {
+
+    LocalDate start = LocalDate.of(year, month, 1);
+    LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+    List<Attendance> records =
+            attendanceRepository.findByEmployeeIdAndWorkDateBetween(employeeId, start, end);
+
+    long standardWorkingMinutes = 8 * 60;
+
+    long totalOvertimeMinutes = records.stream()
+            .filter(a -> a.getCheckIn() != null && a.getCheckOut() != null)
+            .mapToLong(a -> {
+              long workedMinutes = Duration.between(a.getCheckIn(), a.getCheckOut()).toMinutes();
+              return Math.max(workedMinutes - standardWorkingMinutes, 0);
+            })
+            .sum();
+
+    return new OvertimeSummary(employeeId, month, year, totalOvertimeMinutes, totalOvertimeMinutes / 60.0);
+  }
+
+  public record OvertimeSummary(
+          Long employeeId,
+          int month,
+          int year,
+          long totalOvertimeMinutes,
+          double totalOvertimeHours) {}
 }
