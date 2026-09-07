@@ -40,7 +40,7 @@
     <module>mcp-server</module>
     <module>adk-shrija-domain</module>
       <module>auth-service</module>
-<!--      <module>Leaves-agent</module>-->
+      <module>attendance-agent</module>
   </modules>
 
   <properties>
