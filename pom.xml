@@ -42,6 +42,7 @@
     <module>attendance-agent</module>
     <module>auth-service</module>
     <module>employee-agent</module>
+    <module>manager-agent</module>
   </modules>
 
   <properties>
