@@ -2,62 +2,49 @@ package com.shrija.ai.config;
 
 import com.google.adk.JsonBaseModel;
 import com.google.adk.tools.mcp.McpToolset;
+import com.google.adk.tools.mcp.SseServerParameters;
 import com.google.adk.tools.mcp.StreamableHttpServerParameters;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Two {@link McpToolset} beans, both pointed at the same {@code mcp-shrija-server} endpoint but
- * each filtered (via the toolset's {@code toolNames} allowlist constructor) to only the tools that
- * agent is allowed to call.
- *
- * <p>This filtering exists for a real reason, not just tidiness: the MCP server exposes every
- * HR/leave/document tool from one endpoint. Without a client-side allowlist, giving the Employee
- * Agent an unfiltered toolset would hand it {@code approveLeaveRequest}/{@code
- * rejectLeaveRequest}/{@code markDocumentReady} etc. - exactly the self-approval capability the
- * earlier split between {@code EmployeeSelfServiceService} and {@code LeaveApprovalService} was
- * built to prevent. The boundary that used to live in "which Java class has a reference to which
- * service" now lives here instead.
- */
+import java.util.List;
+
 @Configuration
 public class McpToolsetConfig {
+    private static final List<String> EMPLOYEE_TOOLS = ImmutableList.of(
+            "getEmployeeProfile", "getLeaveBalance", "applyForLeave", "getLeaveRequests");
+    private static final List<String> ATTENDANCE_TOOLS = ImmutableList.of(
+            "checkIn", "checkOut", "getAttendanceForRange");
+    private static final List<String> PAYROLL_TOOLS = ImmutableList.of(
+            "getPayrollHistory", "getLatestSalary");
+    private static final List<String> HR_TOOLS = ImmutableList.of(
+            "createEmployee", "recordTransfer", "recordExit");
 
-  private static final List<String> HR_TOOL_NAMES =
-      ImmutableList.of(
-          "getEmployeeByCode",
-          "listEmployeesByDepartment",
-          "addEmployee",
-          "deleteEmployee",
-          "transferEmployee",
-          "listPendingLeaveRequests",
-          "approveLeaveRequest",
-          "rejectLeaveRequest",
-          "listPendingDocumentRequests",
-          "markDocumentReady",
-          "markDocumentDelivered");
+    @Bean
+    public McpToolset employeeMcpToolset(ShrijaAiProperties properties) {
+        return toolset(properties, EMPLOYEE_TOOLS);
+    }
 
-  private static final List<String> EMPLOYEE_TOOL_NAMES =
-      ImmutableList.of(
-          "checkLeaveBalance",
-          "applyForLeave",
-          "checkOnboardingOffboardingStatus",
-          "requestDocument",
-          "checkDocumentRequestStatus");
+    @Bean
+    public McpToolset attendanceMcpToolset(ShrijaAiProperties properties) {
+        return toolset(properties, ATTENDANCE_TOOLS);
+    }
 
-  @Bean
-  public McpToolset hrMcpToolset(ShrijaAiProperties properties) {
-    return new McpToolset(connectionParams(properties), JsonBaseModel.getMapper(), HR_TOOL_NAMES);
-  }
+    @Bean
+    public McpToolset payrollMcpToolset(ShrijaAiProperties properties) {
+        return toolset(properties, PAYROLL_TOOLS);
+    }
 
-  @Bean
-  public McpToolset employeeMcpToolset(ShrijaAiProperties properties) {
-    return new McpToolset(
-        connectionParams(properties), JsonBaseModel.getMapper(), EMPLOYEE_TOOL_NAMES);
-  }
+    @Bean
+    public McpToolset hrMcpToolset(ShrijaAiProperties properties) {
+        return toolset(properties, HR_TOOLS);
+    }
 
-  private StreamableHttpServerParameters connectionParams(ShrijaAiProperties properties) {
-    return StreamableHttpServerParameters.builder().url(properties.mcpServerUrl()).build();
-  }
+    private McpToolset toolset(ShrijaAiProperties properties, List<String> toolNames) {
+        SseServerParameters params =
+                SseServerParameters.builder().url(properties.mcpServerUrl()).build();
+        return new McpToolset(params, JsonBaseModel.getMapper(), toolNames);
+    }
 }

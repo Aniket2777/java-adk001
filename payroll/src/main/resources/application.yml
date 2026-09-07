@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: payroll-agent
+
+server:
+  port: ${SERVER_PORT:8085}
+
+payroll:
+  agent:
+    gemini-api-key: ${GEMINI_API_KEY}
+    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
+    mcp-server-url: ${MCP_SERVER_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.shrija.payroll: INFO
+    com.google.adk: INFO

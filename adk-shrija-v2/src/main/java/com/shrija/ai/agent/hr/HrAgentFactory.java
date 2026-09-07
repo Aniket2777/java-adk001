@@ -7,6 +7,8 @@ import com.google.adk.tools.mcp.McpToolset;
 import com.google.common.collect.ImmutableList;
 import com.shrija.ai.agent.AgentFactory;
 import com.shrija.ai.prompts.HrAgentPrompts;
+import com.shrija.ai.security.AgentRoleGuard;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +47,7 @@ public class HrAgentFactory implements AgentFactory {
                 + "database, never directly.")
         .instruction(HrAgentPrompts.HR_AGENT_INSTRUCTION)
         .model(geminiModel)
+        .beforeAgentCallbackSync(AgentRoleGuard.requireRoles(Set.of("HR", "ADMIN")))
         .tools(ImmutableList.of(hrMcpToolset))
         .build();
   }

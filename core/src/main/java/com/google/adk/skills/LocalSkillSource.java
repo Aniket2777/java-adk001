@@ -71,7 +71,7 @@ public final class LocalSkillSource extends AbstractSkillSource<Path> {
                 return paths
                     .filter(Files::isRegularFile)
                     .map(skillDir::relativize)
-                    .map(Path::toString)
+                    .map(path -> path.toString().replace('\\', '/'))
                     .collect(toImmutableList());
               }
             })

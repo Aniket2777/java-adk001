@@ -37,8 +37,9 @@
     <module>tutorials/live-audio-single-agent</module>
     <module>a2a</module>
     <module>adk-shrija-v2</module>
-    <module>mcp-shrija-server</module>
+    <module>mcp-server</module>
     <module>adk-shrija-domain</module>
+    <module>payroll</module>
   </modules>
 
   <properties>
@@ -437,6 +438,30 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+
+        <configuration>
+          <annotationProcessorPaths>
+
+            <!-- AutoValue from parent ADK configuration -->
+            <path>
+              <groupId>com.google.auto.value</groupId>
+              <artifactId>auto-value</artifactId>
+              <version>${auto-value.version}</version>
+            </path>
+
+            <!-- Lombok -->
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.38</version>
+            </path>
+
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
