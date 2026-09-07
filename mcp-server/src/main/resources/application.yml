@@ -1,15 +1,14 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
     name: hrms-mcp-server
 
   datasource:
-#    url: jdbc:mysql://localhost:3306/hrms_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
     url: jdbc:mysql://localhost:3306/hrms_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

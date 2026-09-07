@@ -18,9 +18,9 @@
     <description>Leave Management Agent (ADK + MCP + A2A) built on Spring Boot</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <mcp-sdk.version>2.0.0</mcp-sdk.version>
-        <a2a-sdk.version>0.3.3.Final</a2a-sdk.version>
+        <a2a-sdk.version>0.3.2.Final</a2a-sdk.version>
     </properties>
 
     <dependencies>
@@ -56,16 +56,20 @@
           Verify the latest coordinates/version at https://github.com/a2aproject/a2a-java
         -->
         <dependency>
+
+<!--            <groupId>org.a2aproject.sdk</groupId>-->
+<!--            <artifactId>a2a-java-sdk-client</artifactId>-->
+<!--            <version>${a2a-sdk.version}</version>-->
+
+                <groupId>io.github.a2asdk</groupId>
+                <artifactId>a2a-java-sdk-client</artifactId>
+                <version>${a2a-sdk.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.a2asdk</groupId>
-            <artifactId>a2a-java-sdk-client</artifactId>
+            <artifactId>a2a-java-sdk-reference-jsonrpc</artifactId>
             <version>${a2a-sdk.version}</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>io.github.a2asdk</groupId>-->
-<!--            <artifactId>a2a-java-sdk-server</artifactId>-->
-<!--            <version>${a2a-sdk.version}</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.projectlombok</groupId>

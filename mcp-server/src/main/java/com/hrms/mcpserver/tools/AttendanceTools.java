@@ -40,22 +40,40 @@ public class AttendanceTools {
 
   @Tool(
       description =
-          "Record a check-out for an employee's existing attendance record and compute hours worked")
+          "Record a check-out for an employee for the given work date and compute hours worked")
   public Attendance checkOut(
-      @ToolParam(description = "Attendance record ID") Long attendanceId,
+      @ToolParam(description = "Employee ID") Long employeeId,
+      @ToolParam(description = "Work date (yyyy-MM-dd)") LocalDate workDate,
       @ToolParam(description = "Check-out time (HH:mm)") LocalTime checkOutTime) {
+
     Attendance attendance =
         attendanceRepository
-            .findById(attendanceId)
+            .findByEmployeeIdAndWorkDate(employeeId, workDate)
             .orElseThrow(
                 () ->
                     new IllegalArgumentException(
-                        "No attendance record found with id " + attendanceId));
+                        "No attendance record found for employee "
+                            + employeeId
+                            + " on "
+                            + workDate));
+
+    if (attendance.getCheckIn() == null) {
+      throw new IllegalStateException("Employee has no check-in record for " + workDate);
+    }
+
+    if (attendance.getCheckOut() != null) {
+      throw new IllegalStateException("Employee has already checked out for " + workDate);
+    }
+
     attendance.setCheckOut(checkOutTime);
+
     double hours = Duration.between(attendance.getCheckIn(), checkOutTime).toMinutes() / 60.0;
+
     attendance.setHoursWorked(Math.max(hours, 0));
+
     attendance.setStatus(
         hours < 4 ? Attendance.AttendanceStatus.HALF_DAY : Attendance.AttendanceStatus.PRESENT);
+
     return attendanceRepository.save(attendance);
   }
 
@@ -119,4 +137,104 @@ public class AttendanceTools {
       double totalHoursWorked,
       long presentDays,
       long absentDays) {}
+
+  @Tool(description = "Calculate an employee's working hours and overtime for a specific work date")
+  public WorkingHoursResult getWorkingHours(
+      @ToolParam(description = "Employee ID") Long employeeId,
+      @ToolParam(description = "Work date (yyyy-MM-dd)") LocalDate workDate) {
+
+    Attendance attendance =
+        attendanceRepository
+            .findByEmployeeIdAndWorkDate(employeeId, workDate)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "No attendance record found for employee "
+                            + employeeId
+                            + " on "
+                            + workDate));
+
+    LocalTime checkIn = attendance.getCheckIn();
+    LocalTime checkOut = attendance.getCheckOut();
+
+    if (checkIn == null || checkOut == null) {
+      return new WorkingHoursResult(employeeId, workDate, checkIn, checkOut, 0, 0);
+    }
+
+    long workingMinutes = Duration.between(checkIn, checkOut).toMinutes();
+
+    long standardWorkingMinutes = 8 * 60;
+
+    long overtimeMinutes = Math.max(workingMinutes - standardWorkingMinutes, 0);
+
+    return new WorkingHoursResult(
+        employeeId, workDate, checkIn, checkOut, workingMinutes, overtimeMinutes);
+  }
+
+  public record WorkingHoursResult(
+      Long employeeId,
+      LocalDate workDate,
+      LocalTime checkIn,
+      LocalTime checkOut,
+      long workingMinutes,
+      long overtimeMinutes) {}
+
+  @Tool(description = "Get total overtime minutes/hours for an employee for a given month")
+  public OvertimeSummary getOvertime(
+      @ToolParam(description = "Employee ID") Long employeeId,
+      @ToolParam(description = "Month (1-12)") int month,
+      @ToolParam(description = "Year") int year) {
+
+    LocalDate start = LocalDate.of(year, month, 1);
+    LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+    List<Attendance> records =
+        attendanceRepository.findByEmployeeIdAndWorkDateBetween(employeeId, start, end);
+
+    long standardWorkingMinutes = 8 * 60;
+
+    long totalOvertimeMinutes =
+        records.stream()
+            .filter(a -> a.getCheckIn() != null && a.getCheckOut() != null)
+            .mapToLong(
+                a -> {
+                  long workedMinutes =
+                      Duration.between(a.getCheckIn(), a.getCheckOut()).toMinutes();
+                  return Math.max(workedMinutes - standardWorkingMinutes, 0);
+                })
+            .sum();
+
+    return new OvertimeSummary(
+        employeeId, month, year, totalOvertimeMinutes, totalOvertimeMinutes / 60.0);
+  }
+
+  public record OvertimeSummary(
+      Long employeeId, int month, int year, long totalOvertimeMinutes, double totalOvertimeHours) {}
+
+  @Tool(description = "Get attendance status for all employees on a given date (used by managers)")
+  public List<TeamAttendanceEntry> getTeamAttendance(
+      @ToolParam(description = "Date (yyyy-MM-dd)") LocalDate date) {
+
+    List<Attendance> records = attendanceRepository.findByWorkDate(date);
+
+    return records.stream()
+        .map(
+            a ->
+                new TeamAttendanceEntry(
+                    a.getEmployeeId(),
+                    a.getWorkDate(),
+                    a.getStatus(),
+                    a.getCheckIn(),
+                    a.getCheckOut(),
+                    a.getHoursWorked()))
+        .toList();
+  }
+
+  public record TeamAttendanceEntry(
+      Long employeeId,
+      LocalDate workDate,
+      Attendance.AttendanceStatus status,
+      LocalTime checkIn,
+      LocalTime checkOut,
+      double hoursWorked) {}
 }
